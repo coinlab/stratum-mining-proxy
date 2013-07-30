@@ -1,3 +1,17 @@
+This converts the statum mining protocol into getworks for leaf.
+
+To start:
+    $ forever start run-proxy-forever.js
+
+Confirm that it is running by:
+    $ forever list
+or
+    $ cd logs
+    $ tail -f forever.log
+
+
+Slush's README.md:
+
 stratum-mining-proxy
 ====================
 
