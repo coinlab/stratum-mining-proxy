@@ -238,7 +238,6 @@ class JobRegistry(object):
         #log.info('!!! %s' % header[:160])
         log.info("Submitting %s" % utils.format_hash(binascii.hexlify(block_hash)))
 
-        #log.info("target: %064x, hash: %064x, difficulty: %s" % (self.target, hash_bin, MAX_TARGET / float(utils.uint256_from_str(hash_bin))))
 
         # 4. Parse ntime and nonce from header
         ntimepos = 17*8 # 17th integer in datastring
@@ -264,16 +263,15 @@ class JobRegistry(object):
         # 3. Format extranonce2 to hex string
         extranonce2_hex = binascii.hexlify(self.extranonce2_padding(extranonce2))
 
-
         # 5. Submit share to the pool
         return self.f.rpc('mining.submit', [worker_name, job.job_id, extranonce2_hex, ntime, nonce])
 
+
 def gen_message(target_long, hash_bin, ntime, nonce, error=None):
-    hash_long = utils.uint256_from_str(hash_bin)
-    log.info('right here, time %s, target %064X, hash %064X, ntime %064X, nonce %064X, error %s' % (
+    log.info('right here, {"time":%s,"target":"%064x","hash":"%064x","ntime":"%s","nonce":"%s","error":"%s"}' % (
             time.time(),
             target_long,
-            hash_long,
+            utils.uint256_from_str(hash_bin),
             ntime,
             nonce,
             error
