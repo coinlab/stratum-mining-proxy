@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+grep "right here" forever.log > parsed.log
+python parse_log.py
