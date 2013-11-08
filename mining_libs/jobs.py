@@ -268,10 +268,11 @@ class JobRegistry(object):
 
 
 def gen_message(target_long, hash_bin, ntime, nonce, error=None):
-    log.info('right here, {"time":%s,"target":"%064x","hash":"%064x","ntime":"%s","nonce":"%s","error":"%s"}' % (
+    log.info('right here, {"time":%s,"target":"%064x","hash":"%064x","difficulty":"%d","ntime":"%s","nonce":"%s","error":"%s"}' % (
             time.time(),
             target_long,
             utils.uint256_from_str(hash_bin),
+            MAX_TARGET / float(utils.uint256_from_str(hash_bin)),
             ntime,
             nonce,
             error
