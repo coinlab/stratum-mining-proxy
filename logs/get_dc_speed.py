@@ -31,7 +31,7 @@ def find(f, d):
         if 'accepted' not in line:
             continue
 
-        print line,
+        #print line,
         date_str = line[:date_len]
         #print date_str
         timestamp = epoch_from_human_time(date_str)
@@ -47,7 +47,7 @@ def find(f, d):
             d[timestamp] = 0
 
         d[timestamp] += diff
-        print diff, date_str, '\n'
+        #print diff, date_str
 
     f.close()
 
@@ -58,14 +58,18 @@ def main(possible_files):
         try:
             f = open(filename)
             find(f, d)
+            print "Done with %s" % filename
         except:
             pass
 
     sorted_keys = sorted(d.keys())
     print "\n"
+    s = ''
     for k in sorted_keys:
-        print "%s, shares: %d, GH/s: %f" % (human_time_from_epoch(k), d[k], (float(d[k]) * 4.295) / 3600)
+        s += "%s,%d,%d,%f\n" % (human_time_from_epoch(k), k, d[k], (float(d[k]) * 4.295) / 3600000)
+        print "%s, shares: %d, TH/s: %f" % (human_time_from_epoch(k), d[k], (float(d[k]) * 4.295) / 3600000)
 
+    open('dc_speed.csv', 'w').write(s)
 
 possible_files = []
 for i in xrange(0, 200):
