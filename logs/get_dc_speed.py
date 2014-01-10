@@ -72,5 +72,8 @@ for i in xrange(0, 200):
     possible_files.append('d%d.log' % i)
     possible_files.append('w%d.log' % i)
     possible_files.append('s%d.log' % i)
+    possible_files.append('d%d.log.1' % i)
+    possible_files.append('w%d.log.1' % i)
+    possible_files.append('s%d.log.1' % i)
 
 main(possible_files)
