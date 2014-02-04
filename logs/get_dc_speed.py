@@ -10,7 +10,7 @@ diff_pat = re.compile('diff\ (\d{1,3})')
 
 def get_share_diff(line):
     try:
-        diff = int(diff_pat.findall(line)[0])
+        diff = int(line[-5:-1])
         #print "Get share diff: %d" % diff
         return diff
     except Exception, e:
@@ -38,7 +38,7 @@ def find(f, d):
         #print timestamp
         timestamp = floor_hour(timestamp)
         #print timestamp
-        date_str = human_time_from_epoch(timestamp)
+        #date_str = human_time_from_epoch(timestamp)
         #print date_str
 
         diff = get_share_diff(line)
@@ -47,7 +47,7 @@ def find(f, d):
             d[timestamp] = 0
 
         d[timestamp] += diff
-        #print diff, date_str
+        #print diff
 
     f.close()
 
@@ -72,12 +72,14 @@ def main(possible_files):
     open('dc_speed.csv', 'w').write(s)
 
 possible_files = []
+
 for i in xrange(0, 200):
     possible_files.append('d%d.log' % i)
     possible_files.append('w%d.log' % i)
     possible_files.append('s%d.log' % i)
-    possible_files.append('d%d.log.1' % i)
-    possible_files.append('w%d.log.1' % i)
-    possible_files.append('s%d.log.1' % i)
+    for j in xrange(0, 20):
+        possible_files.append('d%d.log.%d' % (i, j))
+        possible_files.append('w%d.log.%d' % (i, j))
+        possible_files.append('s%d.log.%d' % (i, j))
 
 main(possible_files)
