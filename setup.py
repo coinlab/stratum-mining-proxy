@@ -16,13 +16,13 @@ args = {
     'version': version.VERSION,
     'description': 'Getwork-compatible proxy for Stratum mining pools',
     'author': 'slush',
-    'author_email': 'info@bitcion.cz',
+    'author_email': 'slush@satoshilabs.com',
     'url': 'http://mining.bitcoin.cz/stratum-mining/',
     'py_modules': ['mining_libs.client_service', 'mining_libs.getwork_listener',
                    'mining_libs.jobs', 'mining_libs.midstate',
                    'mining_libs.multicast_responder', 'mining_libs.stratum_listener',
                    'mining_libs.utils', 'mining_libs.version', 'mining_libs.worker_registry'],
-    'install_requires': ['setuptools>=0.6c11', 'twisted>=12.2.0', 'stratum>=0.2.11', 'argparse'],
+    'install_requires': ['setuptools>=0.6c11', 'twisted>=12.2.0', 'stratum>=0.2.15', 'argparse'],
     'scripts': ['mining_proxy.py'],
 }
 
