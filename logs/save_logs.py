@@ -24,24 +24,21 @@ except:
 
 print "prefix = %s" % prefix
 
-unused_index = 0
+last_used_index = 0
 
 for i in xrange(1, 100):
     try:
         open('%s0.log.%d' % (prefix, i)).close()
+        last_used_index = i
     except Exception, e:
-        print e
-        unused_index = i
-        break
+        pass  # print e
 
 print prefix
-print unused_index
+print last_used_index
 
 
 for i in xrange(0, 200):
     try:
-        call(('mv %s%d.log %s%d.log.%d' % (prefix, i, prefix, i, unused_index)).split())
+        call(('mv %s%d.log %s%d.log.%d' % (prefix, i, prefix, i, last_used_index)).split())
     except:
         pass
-
-
