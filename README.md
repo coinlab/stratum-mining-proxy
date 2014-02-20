@@ -30,7 +30,7 @@ Installation on Linux
 
 1. Download TGZ file from https://github.com/slush0/stratum-mining-proxy/tarball/master
 2. Unpack it by typing "tar xf slush0-stratum-mining_proxy*.tar.gz"
-3. Most likely you already have Python installed on your system. Otherwise install it by "sudo apt-get install python-dev"
+3. Most likely you already have Python respectively OpenSSL installed on your system. Otherwise install it by "sudo apt-get install python-dev libssl-dev"
 (on Ubuntu and Debian).
 3. Type "sudo python setup.py install" in the unpacked directory.
 4. You can start the proxy by typing "./mining_proxy.py" in the terminal window. Using default settings,
@@ -40,7 +40,7 @@ proxy connects to Slush's pool interface.
 Installation on Mac
 -------------------
 1. Download TGZ file from https://github.com/slush0/stratum-mining-proxy/tarball/master
-2. Unpack it by typing "tar xf slush0-stratum-mining_proxy*.tar.gz"
+2. Unpack it by typing "tar xf slush0-stratum-mining-proxy*.tar.gz"
 3. On Mac OS X you already have Python installed on your system, but you lack the llvm-gcc-4.2 binary required to run the setup.py file, so:
 3. a) If you don't want to install Xcode, get gcc here: https://github.com/kennethreitz/osx-gcc-installer
 3. b) OR download Xcode (free) from the App Store, Open it up (it's in your applications folder) and go to preferences, to the downloads section and download/install the 'command line tools'. This will install llvm-gc-4.2.
@@ -77,4 +77,12 @@ Contact
 -------
 
 This proxy is provided by Slush's mining pool at http://mining.bitcoin.cz. You can contact the author
-by email info(at)bitcoin.cz or by IRC on irc.freenode.net in channel #stratum.
+by email slush(at)satoshilabs.com.
+
+Donation
+--------
+This project helps thousands of miners to improve their mining experience and optimize bandwidth of large
+mining operations. Now it is listed on tip4commit service, so if you find this tool handy, feel free
+to throw few satoshis to the basket :-).
+
+[![tip for next commit](http://tip4commit.com/projects/322.svg)](http://tip4commit.com/projects/322)

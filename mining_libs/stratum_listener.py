@@ -1,5 +1,6 @@
 import time
 import binascii
+import struct
 
 from twisted.internet import defer
 
@@ -11,6 +12,13 @@ from jobs import JobRegistry
 
 import stratum.logger
 log = stratum.logger.get_logger('proxy')
+
+def var_int(i):
+    if i <= 0xff:
+        return struct.pack('>B', i)
+    elif i <= 0xffff:
+        return struct.pack('>H', i)
+    raise Exception("number is too big")
 
 class UpstreamServiceException(ServiceException):
     code = -2
@@ -41,7 +49,8 @@ class MiningSubscription(Subscription):
     @classmethod
     def disconnect_all(cls):
         for subs in Pubsub.iterate_subscribers(cls.event):
-            subs.connection_ref().transport.loseConnection()
+            if subs.connection_ref().transport != None:
+                subs.connection_ref().transport.loseConnection()
         
     @classmethod
     def on_template(cls, job_id, prevhash, coinb1, coinb2, merkle_branch, version, nbits, ntime, clean_jobs):
@@ -72,6 +81,8 @@ class StratumProxyService(GenericService):
     is_default = True
     
     _f = None # Factory of upstream Stratum connection
+    custom_user = None
+    custom_password = None
     extranonce1 = None
     extranonce2_size = None
     tail_iterator = 0
@@ -80,6 +91,11 @@ class StratumProxyService(GenericService):
     @classmethod
     def _set_upstream_factory(cls, f):
         cls._f = f
+
+    @classmethod
+    def _set_custom_user(cls, custom_user, custom_password):
+        cls.custom_user = custom_user
+        cls.custom_password = custom_password
         
     @classmethod
     def _set_extranonce(cls, extranonce1, extranonce2_size):
@@ -88,26 +104,29 @@ class StratumProxyService(GenericService):
         
     @classmethod
     def _get_unused_tail(cls):
-        '''Currently adds only one byte to extranonce1, 
-        limiting proxy for up to 255 connected clients.'''
+        '''Currently adds up to two bytes to extranonce1,
+        limiting proxy for up to 65535 connected clients.'''
         
-        for _ in range(256): # 0-255
+        for _ in range(0, 0xffff):  # 0-65535
             cls.tail_iterator += 1
-            cls.tail_iterator %= 255
+            cls.tail_iterator %= 0xffff
 
             # Zero extranonce is reserved for getwork connections
             if cls.tail_iterator == 0:
                 cls.tail_iterator += 1
 
-            tail = binascii.hexlify(chr(cls.tail_iterator))
+            # var_int throws an exception when input is >= 0xffff
+            tail = var_int(cls.tail_iterator)
+            tail_len = len(tail)
 
             if tail not in cls.registered_tails:
                 cls.registered_tails.append(tail)
-                return (tail, cls.extranonce2_size-1)
+                return (binascii.hexlify(tail), cls.extranonce2_size - tail_len)
             
         raise Exception("Extranonce slots are full, please disconnect some miners!")
     
     def _drop_tail(self, result, tail):
+        tail = binascii.unhexlify(tail)
         if tail in self.registered_tails:
             self.registered_tails.remove(tail)
         else:
@@ -118,6 +137,10 @@ class StratumProxyService(GenericService):
     def authorize(self, worker_name, worker_password, *args):
         if self._f.client == None or not self._f.client.connected:
             yield self._f.on_connect
+
+        if self.custom_user != None:
+            # Already subscribed by main()
+            defer.returnValue(True)
                         
         result = (yield self._f.rpc('mining.authorize', [worker_name, worker_password]))
         defer.returnValue(result)
@@ -156,7 +179,10 @@ class StratumProxyService(GenericService):
         tail = session.get('tail')
         if tail == None:
             raise SubmitException("Connection is not subscribed")
-        
+
+        if self.custom_user:
+            worker_name = self.custom_user
+
         start = time.time()
         
         try:
@@ -169,3 +195,7 @@ class StratumProxyService(GenericService):
         response_time = (time.time() - start) * 1000
         log.info("[%dms] Share from '%s' accepted, diff %d" % (response_time, worker_name, DifficultySubscription.difficulty))
         defer.returnValue(result)
+
+    def get_transactions(self, *args):
+        log.warn("mining.get_transactions isn't supported by proxy")
+        return []
