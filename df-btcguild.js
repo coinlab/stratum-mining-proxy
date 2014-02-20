@@ -9,7 +9,7 @@ for (var i = 0; i < 49; i++) {
     forever.start(command.split(' '), {
         'append': true,
         'silent': true,
-        'errFile': "/home/ubuntu/src/stratum-mining-proxy/logs/w" + i + ".log"
+        'errFile': "/home/ubuntu/src/stratum-mining-proxy/logs/d" + i + ".log"
     });
     port++;
 }
