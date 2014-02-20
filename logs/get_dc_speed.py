@@ -3,10 +3,11 @@
 import re
 import datetime
 import time
+from subprocess import call
+
+import save_logs
 
 date_len = len('2014-01-09 17:01:29')
-
-diff_pat = re.compile('diff\ (\d{1,3})')
 
 def get_share_diff(line):
     try:
@@ -25,6 +26,9 @@ def epoch_from_human_time(date_str):
 
 def human_time_from_epoch(timestamp):
     return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d %H:%M')
+
+def human_date_from_epoch(timestamp):
+    return datetime.datetime.fromtimestamp(int(timestamp)).strftime('%Y-%m-%d')
 
 def find(f, d):
     for line in f:
@@ -52,34 +56,68 @@ def find(f, d):
     f.close()
 
 
-def main(possible_files):
+def main(possible_files, output_filename):
     d = {}
     for filename in possible_files:
         try:
             f = open(filename)
             find(f, d)
             print "Done with %s" % filename
-        except:
+        except IOError:
             pass
 
+    try:
+        old = [x for x in open(output_filename).read().split('\n') if len(x) > 0]
+    except IOError, e:
+        old = []
+        print "Error opening %s: %s" % (output_filename, e)
+
+    for line in old:
+        line = line.split(',')
+        timestamp = int(line[1])
+        shares = int(line[2])
+        if timestamp in d:
+            d[timestamp] += shares
+        else:
+            d[timestamp] = shares
+
     sorted_keys = sorted(d.keys())
-    print "\n"
     s = ''
     for k in sorted_keys:
         s += "%s,%d,%d,%f\n" % (human_time_from_epoch(k), k, d[k], (float(d[k]) * 4.295) / 3600000)
-        print "%s, shares: %d, TH/s: %f" % (human_time_from_epoch(k), d[k], (float(d[k]) * 4.295) / 3600000)
+        #print "%s, shares: %d, TH/s: %f" % (human_time_from_epoch(k), d[k], (float(d[k]) * 4.295) / 3600000)
 
-    open('dc_speed.csv', 'w').write(s)
+    open('%s_%s' % (human_date_from_epoch(int(time.time())), output_filename), 'w').write(s)
+    open(output_filename, 'w').write(s)
 
-possible_files = []
 
-for i in xrange(0, 200):
-    possible_files.append('d%d.log' % i)
-    possible_files.append('w%d.log' % i)
-    possible_files.append('s%d.log' % i)
-    for j in xrange(0, 20):
-        possible_files.append('d%d.log.%d' % (i, j))
-        possible_files.append('w%d.log.%d' % (i, j))
-        possible_files.append('s%d.log.%d' % (i, j))
+def init():
+    output_filename = '%s_dc_speed.csv' % (open('/etc/hostname').read().replace('\n', ''))
+    print "output_filename: %s" % output_filename
 
-main(possible_files)
+    possible_files = []
+
+    for i in xrange(0, 200):
+        for j in xrange(0, 100):
+            possible_files.append('d%d.log.%d' % (i, j))
+            possible_files.append('w%d.log.%d' % (i, j))
+            possible_files.append('s%d.log.%d' % (i, j))
+
+    main(possible_files, output_filename)
+
+    for i in xrange(0, 200):
+        for j in xrange(0, 10):
+            remove('d%d.log.%d' % (i, j))
+            remove('w%d.log.%d' % (i, j))
+            remove('s%d.log.%d' % (i, j))
+
+
+def remove(filename):
+    try:
+        open(filename).close()
+        call(('rm %s' % filename).split())
+    except IOError:
+        pass
+
+
+init()

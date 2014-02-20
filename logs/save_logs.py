@@ -22,6 +22,7 @@ except:
     pass
 
 
+print "Saving logs"
 print "prefix = %s" % prefix
 
 last_used_index = 0
@@ -39,6 +40,9 @@ print last_used_index
 
 for i in xrange(0, 200):
     try:
-        call(('mv %s%d.log %s%d.log.%d' % (prefix, i, prefix, i, last_used_index)).split())
+        call(('mv %s%d.log %s%d.log.%d' % (prefix, i, prefix, i, last_used_index + 1)).split())
     except:
         pass
+
+print "restarting forever"
+call('forever restartall'.split())
